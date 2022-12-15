@@ -1,0 +1,44 @@
+{
+  "name": "fixbot",
+  "version": "1.0.0",
+  "description": "A simple node-express CRUD application.",
+  "main": "index.js",
+  "keywords": [
+    "telemetrics",
+    "express"
+  ],
+  "author": "Chibuike Umechukwu<umebuike@gmail.com>",
+  "license": "ISC",
+  "scripts": {
+    "lint": "eslint -c .eslintrc.json \"src/**\"  --fix",
+    "format": "prettier --write 'src/**/*.js'",
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Comurule/fixbot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Comurule/fixbot/issues"
+  },
+  "homepage": "https://github.com/Comurule/fixbot#readme",
+  "devDependencies": {
+    "eslint": "^8.6.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1"
+  },
+  "dependencies": {
+    "cloudinary": "^1.32.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2",
+    "express-validator": "^6.14.0",
+    "formidable": "^2.1.1",
+    "mailgun-js": "^0.22.0",
+    "mailgun.js": "^8.0.6",
+    "mongoose": "^6.1.6",
+    "winston": "^3.4.0"
+  }
+}
