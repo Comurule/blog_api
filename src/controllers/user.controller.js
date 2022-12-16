@@ -18,12 +18,12 @@ exports.signup = async (req, res, next) => {
 			owner: newUser._id
 		})
 		// send email verification
-		await sendMail('user.verification.otp', { otp, user: newUser });
+		sendMail('user.verification.otp', { otp, user: newUser });
 
 		return res.status(201).json({
 			status: 'success',
 			message: 'User created successfully.',
-			data: newUser,
+			data: { ...newUser, otp },
 		})
 	} catch (error) {
 		return next(error)

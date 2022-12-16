@@ -6,9 +6,8 @@ const uploadMedia = require('../services/mediaUpload.service')
 
 exports.create = async (req, res, next) => {
 	try {
-		// const imageUrl = await uploadMedia(req)
-		const imageUrl = "await uploadMedia(req)"
-
+		const imageUrl = await uploadMedia(req)
+console.log({imageUrl})
 		const userExists = await User.exists({
 			_id: req.body.owner,
 			verified: true,
