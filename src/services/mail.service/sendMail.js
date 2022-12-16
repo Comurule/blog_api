@@ -30,7 +30,7 @@ module.exports = async (templateData, data) => {
     }
 
     const fileData = await fsPromises.readFile(filepath);
-    const file = { filename: 'docuplier.png', fileData };
+    const file = { filename: 'docuplier.png', data: fileData };
 
     messageData.inline = file;
     return client.messages.create(config.MAILGUN_DOMAIN, messageData);
