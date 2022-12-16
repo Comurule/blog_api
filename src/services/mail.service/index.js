@@ -27,7 +27,7 @@ const getEmailTemplate = (mailType, data) => {
 module.exports = (mailType, data) => {
     validate(mailType, data);
     const { subject, templateData } = getEmailTemplate(mailType, data);
-    const email = data.email;
+    const email = data.user.email;
 
     return sendMail(templateData, { email, subject });
 }
