@@ -1,4 +1,6 @@
 const express = require('express')
+const cors = require("cors");
+const helmet = require('helmet');
 const routes = require('./routes')
 const { connectToDB } = require('./db')
 const config = require('./config')
@@ -10,8 +12,21 @@ const port = config.PORT
 const databaseUrl = config.DATABASE_URL
 
 // Application middlewares
+app.set('trust proxy', 1) // trust first proxy
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+
+app.use(cors())
+app.options('*', cors())
+
+app.use(helmet())
+
+function customHeaders(req, res, next) {
+  app.disable('x-powered-by');
+  res.setHeader('X-Powered-By', 'Docuplier');
+  next();
+}
+app.use(customHeaders);
 
 // Application routes
 app.use(routes)

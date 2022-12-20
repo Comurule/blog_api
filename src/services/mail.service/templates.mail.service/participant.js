@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+module.exports = (dplLogo, title, data)=>`<!DOCTYPE html>
 <html lang="en">
 
     <head>
@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
         <link href="https://fonts.googleapis.com/css2?family=Pridi:wght@300&display=swap" rel="stylesheet">
-        <title>Document</title>
+        <title>${title}</title>
         <style>
             .container {
                 height: 100vh;
@@ -74,12 +74,12 @@
         <div class="container">
             <div class="card">
                 <div class="card_mini">
-                    <img src="./dpl2 1.png" alt="" style="width: 439px;
+                    <img src="${dplLogo}" alt="" style="width: 439px;
                     height: 110px; margin-bottom: 30px;">
                     <h3 style="width: 796.44px; height: 72px; margin-left: 35px; font-family: 'Nunito'; font-style: normal; font-weight: 600; font-size: 30px;
-                    line-height: 32px; color: #000000;">Hey - {{Chiamaka Chibuike Henry}} -
+                    line-height: 32px; color: #000000;">Hey ${data.client.name}
                         <!--Placeholder text--> Special delivery for you
-                        from -{{covener name}}-
+                        from ${data.orgName}
                         <!--Placeholder text-->
                     </h3>
                     <p
@@ -87,18 +87,18 @@
                         Congratulations are in order right 🤗 ? Click on the button below
                         to view, download or share as you have earned this. </p>
                     <div class="button">
-                        <p style="width: 198px; height: 40px; font-family: 'Nunito'; font-style: normal; font-weight: 700; font-size: 32px; line-height: 40px; display: flex; align-items: center; color: #FFFFFF;
-                        ">Click to View</p>
+                        <a style="width: 198px; height: 40px; font-family: 'Nunito'; font-style: normal; font-weight: 700; font-size: 32px; line-height: 40px; display: flex; align-items: center; color: #FFFFFF;
+                        " href="${data.link}">Click to View</a>
                     </div>
                     <p style="width: 750px; height: 55px; font-family: 'Nunito'; font-style: normal; font-weight: 500; font-size: 22px; line-height: 32px;
                      color: #000000; margin-top: 50px;
                     ">If you are having troubles clicking this button, or have any questions, kindly
-                        reach out to us at <a style="color: #3B4CF1; cursor: pointer;">-{{coveneremail@email.com}}-</a>
+                        reach out to us at <a style="color: #3B4CF1; cursor: pointer;">-${data.email}-</a>
                         <!--Placeholder email-->
                     </p>
                     <div class="proud">
                         <h3 style="width: 260px; height: 23px; font-family: 'Pridi'; font-style: normal; font-weight: 300; font-size: 25px; line-height: 22px; color: #000000;
-                        ">Proudly Distributed by </h3><img src="./dpl2 1.png" alt=""
+                        ">Proudly Distributed by </h3><img src="${dplLogo}" alt=""
                             style="width: 203.02px; height: 51.05px; margin-left: 15px;">
                     </div>
 
@@ -112,4 +112,4 @@
         </div>
     </body>
 
-</html>
+</html>`

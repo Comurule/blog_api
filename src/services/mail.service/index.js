@@ -15,7 +15,7 @@ const getEmailTemplate = (mailType, data) => {
         'user.verification.otp': {
             subject: constants.OTP_VERIFICATION_SUBJECT,
             templateData: {
-                template: require('./templates.mail.service/otp-email')('cid:docuplier.js',constants.OTP_VERIFICATION_TITLE, data.otp),
+                template: require('./templates.mail.service/otp-email')('cid:docuplier.png',constants.OTP_VERIFICATION_TITLE, data.otp),
                 bulkEmailData: null,
             }
         },

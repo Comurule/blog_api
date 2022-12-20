@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+module.exports = (dplLogo, title, link) => `<!DOCTYPE html>
 <html lang="en">
 
     <head>
@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
         <link href="https://fonts.googleapis.com/css2?family=Pridi:wght@300&display=swap" rel="stylesheet">
-        <title>Document</title>
+        <title>${title}</title>
         <style>
             .container {
                 height: 100vh;
@@ -73,7 +73,7 @@
         <div class="container">
             <div class="card">
                 <div class="card_mini">
-                    <img src="./dpl2 1.png" alt="" style="width: 439px;
+                    <img src="${dplLogo}" alt="" style="width: 439px;
                     height: 110px; margin-bottom: 30px;">
                     <h2 style="width: 367px; height: 22px; font-family: 'Nunito'; font-style: normal; font-weight: 700; font-size: 30px; line-height: 22px; color: #000000;
                     ">Pheww, We sent them all!</h2>
@@ -83,8 +83,8 @@
                         link below to see who received it and also download them if you
                         want to print them.</p>
                     <div class="button">
-                        <p style="width: 390px; height: 40px; font-family: 'Nunito'; font-style: normal; font-weight: 700; font-size: 32px; line-height: 40px; display: flex; align-items: center; color: #FFFFFF;
-                        ">Check Status & Download</p>
+                        <a style="width: 390px; height: 40px; font-family: 'Nunito'; font-style: normal; font-weight: 700; font-size: 32px; line-height: 40px; display: flex; align-items: center; color: #FFFFFF;
+                        " href="${link}">Check Status & Download</p>
                     </div>
                     <p style="width: 750px; height: 55px; margin-top: 60px; font-family: 'Nunito'; font-style: normal; font-weight: 500; font-size: 22px; line-height: 32px;
                      color: #000000; margin-left: 20px;
@@ -92,7 +92,7 @@
                         reach out to us at <a style="color: #3B4CF1; cursor: pointer;">-support@docuplier.com-</a></p>
                     <div class="proud">
                         <h3 style="width: 260px; height: 23px; font-family: 'Pridi'; font-style: normal; font-weight: 300; font-size: 25px; line-height: 22px; color: #000000;
-                        ">Proudly Distributed by </h3><img src="./dpl2 1.png" alt=""
+                        ">Proudly Distributed by </h3><img src="${dplLogo}" alt=""
                             style="width: 203.02px; height: 51.05px; margin-left: 15px;">
                     </div>
                 </div>
@@ -100,4 +100,4 @@
         </div>
     </body>
 
-</html>
+</html>`
