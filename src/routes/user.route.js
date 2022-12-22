@@ -11,4 +11,8 @@ router
 	.route('/:id')
 	.put(userController.update)
 
+router
+	.route('/:id/resend-email')
+	.get(userController.resendOTP)
+
 module.exports = router
