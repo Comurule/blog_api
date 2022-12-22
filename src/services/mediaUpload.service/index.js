@@ -39,7 +39,8 @@ module.exports = (req) => {
                 const result = await cloudinary.uploader.upload(image.filepath)
 
                 // pass the other contents to the req.body since we're receiving it via formData
-                req.body = fields;
+                req.body = parseToObj(fields);
+
                 return res(result.secure_url);
             } catch (error) {
                 return rej(error);
@@ -48,6 +49,18 @@ module.exports = (req) => {
 
     });
 };
+
+const parseToObj = (flatBody) => {
+    const keys = Object.keys(flatBody);
+    return keys.reduce((body, key) => {
+        try {
+            body[key] = JSON.parse(flatBody[key]);
+        } catch (error) {
+            body[key] = flatBody[key];
+        }
+        return body;
+    }, {})
+} 
 
 const validateImage = image => {
     const validImageFormats = config.constants.VALID_IMAGE_FORMATS;
