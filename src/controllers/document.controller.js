@@ -1,12 +1,51 @@
+const crypto = require('crypto')
 const Document = require('../models/document.model')
 const Product = require('../models/product.model')
 const User = require('../models/user.model')
 const CustomError = require('../utils/customError')
-const uploadMedia = require('../services/mediaUpload.service')
+const MediaLib = require('../services/mediaUpload.service')
+
+const createIdempotencyKey = async (length = 32) => {
+	const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+	let token = [];
+
+	while (length > 0) {
+		let index = await crypto.randomInt(characters.length)
+		token.push(characters[index]);
+		length--;
+	}
+	return token.join('');
+}
 
 exports.create = async (req, res, next) => {
 	try {
-		const imageUrl = await uploadMedia(req)
+		req.body = await MediaLib.parseReqBody(req);
+
+		// Ensure there is at least a client passed
+		if (req.body.clients.length === 0) {
+			throw new CustomError('No recipients passed. Kindly, pass recipients data.', 422)
+		}
+
+		// Ensure that the fields.fieldName is a key in clients
+		const fieldNames = req.body.fields.map(x => x.fieldName);
+		if (fieldNames.length === 0 || !fieldNames.includes('name')) {
+			throw new CustomError('No place holders passed. Kindly, pass placeholders and the respective values.', 422)
+		}
+		const canProceed = fieldNames.every(key => req.body.clients.every(client => !!client[key]));
+		if (!canProceed) throw new CustomError('Ensure all clients have the fields provided.', 422)
+
+		// For idempotencyKey
+		if (!req.body.idempotencyKey) throw new CustomError('idempotencyKey is required.', 422)
+		const isDuplicate = await Document.findOne({
+			idempotencyKey: req.body.idempotencyKey,
+		})
+		if (isDuplicate) {
+			return res.status(201).json({
+				status: 'success',
+				message: 'Document created successfully.',
+				data: isDuplicate,
+			})
+		}
 
 		const userExists = await User.exists({
 			_id: req.body.owner,
@@ -20,13 +59,8 @@ exports.create = async (req, res, next) => {
 		})
 		if (!productExists) throw new CustomError('Product record not found.', 422)
 
-		const isDuplicate = await Document.exists({
-			orgName: new RegExp(req.body.orgName, 'gi'),
-		})
-		if (isDuplicate) throw new CustomError('Document name already exists!', 400)
-
 		// add the image url to the req.body
-		req.body.image.src = imageUrl
+		req.body.image.src = await MediaLib.uploadImage(req.body.file)
 		const newDocument = await Document.create(req.body)
 
 		return res.status(201).json({
@@ -100,12 +134,33 @@ exports.getOne = async (req, res, next) => {
 	}
 }
 
+exports.getIdempotencyKey = async (req, res, next) => {
+	try {
+		let idempotencyKey = await createIdempotencyKey();
+		let isDuplicate = await Document.exists({ idempotencyKey });
+
+		while (isDuplicate) {
+			console.log('hit here...')
+			idempotencyKey = await createIdempotencyKey();
+			isDuplicate = await Document.exists({ idempotencyKey });
+		}
+
+		return res.status(200).json({
+			status: 'success',
+			message: 'Document idempotency key.',
+			data: { idempotencyKey },
+		})
+	} catch (error) {
+		return next(error)
+	}
+}
+
 exports.getOneForClients = async (req, res, next) => {
 	try {
 		const document = await Document.findById(req.params.id).lean()
 		if (!document) throw new CustomError('Document record not found.', 404)
 
-		document.client = document.clients.filter(x => x._id.toString() === req.params.clientId);
+		document.client = document.clients.find(x => x._id.toString() === req.params.clientId);
 		delete document.clients;
 
 		return res.status(200).json({

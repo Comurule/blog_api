@@ -10,44 +10,51 @@ cloudinary.config({
 });
 /**
  * Uploads image file to cloudinary
- * @param {object} req - Express Request object
- * @returns {Promise<string>} download url of the image
+ * @param {Request} req - Express Request object
+ * @returns  the req body data + media file
  */
-module.exports = (req) => {
+exports.parseReqBody = (req) => {
     var form = new formidable.IncomingForm({
         multiples: false,
         allowEmptyFiles: false,
         maxFields: 0, // unlimited fields 
-        maxFieldsSize: 25*1024*1024,
+        maxFieldsSize: 25 * 1024 * 1024,
         // maxFiles: 5,
         // maxFileSize: 25 * 1024 * 1024,
         // uploadDir: path.resolve(__dirname, '../../images')
     });
 
-    return new Promise((res, rej) => {
+    return new Promise((resolve, reject) => {
         form.parse(req, async function (err, fields, file) {
             try {
                 if (err) throw err;
-                if (!file.docImage) throw new CustomError('No Image provided!.', 400);
-                
-                const image = file.docImage;
-                if (image.name == '') throw new CustomError('Image is required!', 400);
-
-                const validationError = validateImage(image);
-                if (validationError) throw new CustomError(validationError, 400);
-
-                const result = await cloudinary.uploader.upload(image.filepath)
 
                 // pass the other contents to the req.body since we're receiving it via formData
-                req.body = parseToObj(fields);
+                return resolve({
+                    ...parseToObj(fields),
+                    file
+                });
 
-                return res(result.secure_url);
             } catch (error) {
-                return rej(error);
+                return reject(error);
             }
         })
 
     });
+};
+
+exports.uploadImage = async (file) => {
+    if (!file.docImage) throw new CustomError('No Image provided!.', 400);
+
+    const image = file.docImage;
+    if (image.name == '') throw new CustomError('Image is required!', 400);
+
+    const validationError = validateImage(image);
+    if (validationError) throw new CustomError(validationError, 400);
+
+    const result = await cloudinary.uploader.upload(image.filepath)
+
+    return result.secure_url;
 };
 
 const parseToObj = (flatBody) => {
@@ -60,7 +67,7 @@ const parseToObj = (flatBody) => {
         }
         return body;
     }, {})
-} 
+}
 
 const validateImage = image => {
     const validImageFormats = config.constants.VALID_IMAGE_FORMATS;

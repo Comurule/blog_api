@@ -15,7 +15,7 @@ const imageSchema = new mongoose.Schema({
 		required: true,
 		default: 0
 	},
-}, {_id: false})
+}, { _id: false })
 const fieldSchema = new mongoose.Schema({
 	fieldName: {
 		type: String,
@@ -58,7 +58,7 @@ const fieldSchema = new mongoose.Schema({
 		type: mongoose.Decimal128,
 		required: true,
 	},
-}, {_id: false})
+}, { _id: false })
 const clientSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -75,11 +75,16 @@ const clientSchema = new mongoose.Schema({
 })
 const docSchema = new mongoose.Schema(
 	{
+		idempotencyKey: {
+			type: String,
+			required: true,
+			unique: true,
+		},
 		orgName: {
 			type: String,
 			required: true,
 		},
-		description: {
+		emailText: {
 			type: String,
 			required: true,
 		},
