@@ -27,9 +27,12 @@ exports.create = async (req, res, next) => {
 		}
 
 		// Ensure that the fields.fieldName is a key in clients
-		const fieldNames = req.body.fields.map(x => x.fieldName);
-		if (fieldNames.length === 0 || !fieldNames.includes('name')) {
+		if (!Array.isArray(fields) || fields.length === 0) {
 			throw new CustomError('No place holders passed. Kindly, pass placeholders and the respective values.', 422)
+		}
+		const fieldNames = req.body.fields.map(x => x.fieldName);
+		if (!fieldNames.includes('name') || !fieldNames.includes('email')) {
+			throw new CustomError('Invalid place holders passed. Kindly, pass placeholders and the respective values.', 422)
 		}
 		const canProceed = fieldNames.every(key => req.body.clients.every(client => !!client[key]));
 		if (!canProceed) throw new CustomError('Ensure all clients have the fields provided.', 422)

@@ -1,0 +1,1 @@
+import{j as t,l as e,T as n}from"./index.a585d9d8.js";const o=()=>t(e,{height:"100vh",width:"100vw",display:"flex",alignItems:"center",justifyContent:"center",children:t(n,{variant:"h3",children:"404 Page not found"})});export{o as default};
