@@ -31,7 +31,6 @@ function customHeaders(req, res, next) {
 app.use(customHeaders);
 
 // Application routes
-app.use(express.static('public'))
 app.use('/api/v1', routes)
 
 // Application Level Error Handling
