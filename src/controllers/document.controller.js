@@ -31,6 +31,7 @@ exports.create = async (req, res, next) => {
 			throw new CustomError('No place holders passed. Kindly, pass placeholders and the respective values.', 422)
 		}
 		const fieldNames = req.body.fields.map(x => x.fieldName);
+		fieldNames.push('email');
 		if (!fieldNames.includes('name') || !fieldNames.includes('email')) {
 			throw new CustomError('Invalid place holders passed. Kindly, pass placeholders and the respective values.', 422)
 		}
