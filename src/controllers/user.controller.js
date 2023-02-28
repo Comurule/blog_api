@@ -3,6 +3,7 @@ const User = require('../models/user.model')
 const OTP = require('../models/otp.model')
 const CustomError = require('../utils/customError')
 const sendMail = require('../services/mail.service')
+const config = require('../config')
 
 const generateOTP = async (length = 4) => {
 	let token = [];
@@ -35,12 +36,15 @@ exports.signup = async (req, res, next) => {
 			owner: user._id
 		})
 		// send email verification
-		sendMail('user.verification.otp', { otp, user });
+		sendMail(
+			config.constants.EMAIL.TYPE.OTP_VERIFICATION,
+			{ otp, user }
+		).catch(console.log);
 
 		return res.status(201).json({
 			status: 'success',
 			message: 'User created successfully.',
-			data: { otp, ...user._doc },
+			data: user._doc,
 		})
 	} catch (error) {
 		return next(error)

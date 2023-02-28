@@ -1,9 +1,11 @@
 const constants = require('../../config/constants');
-const sendMail = require('./sendMail');
+const sendMail = require('./mailersend');
 
 const validate = (mailType, data) => {
     const typeDataFields = {
-        'user.verification.otp': ['otp', 'user'],
+        [constants.EMAIL.TYPE.OTP_VERIFICATION]: ['otp', 'user'],
+        [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: ['recipients', 'convener', 'document_id'],
+        [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: ['convener', 'document_id'],
     }
     if (!typeDataFields[mailType]) throw new Error(`Invalid mailType: got ${mailType}.`)
     const absentFields = typeDataFields[mailType].filter(x => !data[x]);
@@ -12,12 +14,37 @@ const validate = (mailType, data) => {
 
 const getEmailTemplate = (mailType, data) => {
     const mailTemplatesByType = {
-        'user.verification.otp': {
-            subject: constants.OTP_VERIFICATION_SUBJECT,
-            templateData: {
-                template: require('./templates.mail.service/otp-email')('cid:docuplier.png',constants.OTP_VERIFICATION_TITLE, data.otp),
-                bulkEmailData: null,
-            }
+        [constants.EMAIL.TYPE.OTP_VERIFICATION]: {
+            subject: constants.EMAIL.SUBJECT.OTP_VERIFICATION,
+            templateData: [{
+                email: data.user.email,
+                data: {
+                    token: data.otp.split('').join('  ')
+                }
+            }]
+        },
+
+        [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: {
+            subject: constants.EMAIL.SUBJECT.DOCUMENT_RECIPIENT,
+            templateData: data.recipients.map(x => ({
+                email: x.email,
+                data: {
+                    recipient_name: x.name,
+                    convener_name: data.convener.organization_name,
+                    convener_email: data.convener.email,
+                    document_url: `https://docuplier.com/document?doc=${data.document_id}&client=${x._id}`,
+                }
+            }))
+        },
+
+        [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: {
+            subject: constants.EMAIL.SUBJECT.DOCUMENT_CONVENER,
+            templateData: [{
+                email: data.convener.email,
+                data: {
+                    document_url: `https://docuplier.com/document?doc=${data.document_id}`,
+                }
+            }]
         },
     }
 
@@ -27,7 +54,6 @@ const getEmailTemplate = (mailType, data) => {
 module.exports = (mailType, data) => {
     validate(mailType, data);
     const { subject, templateData } = getEmailTemplate(mailType, data);
-    const email = data.user.email;
 
-    return sendMail(templateData, { email, subject });
+    return sendMail(templateData, subject);
 }

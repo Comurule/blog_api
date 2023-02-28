@@ -4,6 +4,8 @@ const Product = require('../models/product.model')
 const User = require('../models/user.model')
 const CustomError = require('../utils/customError')
 const MediaLib = require('../services/mediaUpload.service')
+const sendMail = require('../services/mail.service')
+const config = require('../config')
 
 const createIdempotencyKey = async (length = 32) => {
 	const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
@@ -51,7 +53,7 @@ exports.create = async (req, res, next) => {
 			})
 		}
 
-		const userExists = await User.exists({
+		const userExists = await User.findOne({
 			_id: req.body.owner,
 			verified: true,
 		})
@@ -67,6 +69,33 @@ exports.create = async (req, res, next) => {
 		req.body.image.src = await MediaLib.uploadImage(req.body.file)
 		const newDocument = await Document.create(req.body)
 
+		Promise.all([
+			// Send email to recipients
+			sendMail(
+				config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT,
+				{
+					document_id: newDocument._id,
+					recipients: newDocument.clients,
+					covener: {
+						name: userExists.name,
+						email: userExists.email,
+						organization_name: req.body.orgName
+					},
+				}
+			),
+			//Send email to Convener
+			sendMail(
+				config.constants.EMAIL.TYPE.DOCUMENT_CONVENER,
+				{
+					document_id: newDocument._id,
+					covener: {
+						name: userExists.name,
+						email: userExists.email,
+						organization_name: req.body.orgName
+					},
+				}
+			),
+		]);
 		return res.status(201).json({
 			status: 'success',
 			message: 'Document created successfully.',
