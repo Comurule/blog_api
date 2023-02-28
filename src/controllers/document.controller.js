@@ -95,7 +95,7 @@ exports.create = async (req, res, next) => {
 					},
 				}
 			),
-		]);
+		]).catch(console.log);
 		return res.status(201).json({
 			status: 'success',
 			message: 'Document created successfully.',
