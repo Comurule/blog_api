@@ -15,21 +15,21 @@ const validate = (mailType, data) => {
 
 const getEmailTemplate = (mailType, data) => {
     const mailTemplatesByType = {
-        [constants.EMAIL.TYPE.OTP_VERIFICATION]: {
+        [constants.EMAIL.TYPE.OTP_VERIFICATION]: () => ({
             id: config.MAILERSEND.TEMPLATE_ID.OTP,
             subject: constants.EMAIL.SUBJECT.OTP_VERIFICATION,
             recipients: [{
-                email: data?.user?.email,
+                email: data.user.email,
                 data: {
-                    token: data?.otp.split('').join('  ')
+                    token: data.otp.split('').join('  ')
                 }
             }]
-        },
+        }),
 
-        [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: {
+        [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: () => ({
             id: config.MAILERSEND.TEMPLATE_ID.PARTICIPANT,
             subject: constants.EMAIL.SUBJECT.DOCUMENT_RECIPIENT,
-            recipients: data?.recipients?.map(x => ({
+            recipients: data.recipients.map(x => ({
                 email: x.email,
                 data: {
                     recipient_name: x.name,
@@ -38,21 +38,21 @@ const getEmailTemplate = (mailType, data) => {
                     document_url: `https://docuplier.com/document?doc=${data.document_id}&client=${x._id}`,
                 }
             })) 
-        },
+        }),
 
-        [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: {
+        [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: () => ({
             id: config.MAILERSEND.TEMPLATE_ID.CONVENER,
             subject: constants.EMAIL.SUBJECT.DOCUMENT_CONVENER,
             recipients: [{
-                email: data?.convener?.email,
+                email: data.convener.email,
                 data: {
                     document_url: `https://docuplier.com/document?doc=${data?.document_id}`,
                 }
             }]
-        },
+        }),
     }
 
-    return mailTemplatesByType[mailType];
+    return mailTemplatesByType[mailType]();
 }
 
 module.exports = (mailType, data) => {
