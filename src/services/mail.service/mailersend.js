@@ -1,31 +1,30 @@
-const path = require('path');
-const fs = require('fs');
 const config = require('../../config');
 const { MailerSend, EmailParams, Sender, Recipient, Attachment } = require("mailersend");
 
 /**
  * 
- * @param {{email: string, data: object}[]} template - html body
- * @param {string} subject - subject of the email to be sent
+ * @param {{
+ *  subject: string,
+ *  recipients: {email:string, data: object}[],
+ *  id:string,
+ * }} template - html body
  * @returns 
  */
-module.exports = async (template, subject) => {
+module.exports = async (template) => {
   const mailerSend = new MailerSend({
     apiKey: config.MAILERSEND.API_KEY,
   });
 
   const sentFrom = new Sender(config.MAILER_SENDER_EMAIL, config.MAILER_SENDER_NAME);
-
-  const recipients = template.map(x => new Recipient(x.email));
-  console.log(recipients)
+  const recipients = template.recipients.map(x => new Recipient(x.email));
 
   const emailParams = new EmailParams()
     .setFrom(sentFrom)
     .setTo(recipients)
     .setReplyTo(sentFrom)
-    .setPersonalization(template)
-    .setSubject(subject)
-    .setTemplateId(config.MAILERSEND.TEMPLATE_ID.OTP);
+    .setPersonalization(template.recipients)
+    .setSubject(template.subject)
+    .setTemplateId(template.id);
 
   await mailerSend.email.send(emailParams);
 }

@@ -14,6 +14,19 @@ const generateOTP = async (length = 4) => {
 	return token.join('');
 }
 
+const sendOTPVerify = async (user) => {
+	const otp = await generateOTP();
+	await OTP.create({
+		otp,
+		owner: user._id
+	})
+	// send email verification
+	return sendMail(
+		config.constants.EMAIL.TYPE.OTP_VERIFICATION,
+		{ otp, user }
+	)
+}
+
 exports.signup = async (req, res, next) => {
 	try {
 		let user = await User.findOne({
@@ -30,16 +43,7 @@ exports.signup = async (req, res, next) => {
 		}
 
 		// Send otp
-		const otp = await generateOTP();
-		await OTP.create({
-			otp,
-			owner: user._id
-		})
-		// send email verification
-		sendMail(
-			config.constants.EMAIL.TYPE.OTP_VERIFICATION,
-			{ otp, user }
-		).catch(console.log);
+		sendOTPVerify(user).catch(console.log);
 
 		return res.status(201).json({
 			status: 'success',
