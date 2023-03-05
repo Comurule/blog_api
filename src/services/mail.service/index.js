@@ -16,7 +16,7 @@ const validate = (mailType, data) => {
 const getEmailTemplate = (mailType, data) => {
     const mailTemplatesByType = {
         [constants.EMAIL.TYPE.OTP_VERIFICATION]: () => ({
-            id: config.MAILERSEND.TEMPLATE_ID.OTP,
+            templateId: config.MAILERSEND.TEMPLATE_ID.OTP,
             subject: constants.EMAIL.SUBJECT.OTP_VERIFICATION,
             recipients: [{
                 email: data.user.email,
@@ -27,7 +27,7 @@ const getEmailTemplate = (mailType, data) => {
         }),
 
         [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: () => ({
-            id: config.MAILERSEND.TEMPLATE_ID.PARTICIPANT,
+            templateId: config.MAILERSEND.TEMPLATE_ID.PARTICIPANT,
             subject: constants.EMAIL.SUBJECT.DOCUMENT_RECIPIENT,
             recipients: data.recipients.map(x => ({
                 email: x.email,
@@ -41,7 +41,7 @@ const getEmailTemplate = (mailType, data) => {
         }),
 
         [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: () => ({
-            id: config.MAILERSEND.TEMPLATE_ID.CONVENER,
+            templateId: config.MAILERSEND.TEMPLATE_ID.CONVENER,
             subject: constants.EMAIL.SUBJECT.DOCUMENT_CONVENER,
             recipients: [{
                 email: data.convener.email,
@@ -59,5 +59,6 @@ module.exports = (mailType, data) => {
     validate(mailType, data);
     const template = getEmailTemplate(mailType, data);
 
+    console.log('Email Template:::', JSON.stringify(template, null, 2));
     return sendMail(template);
 }

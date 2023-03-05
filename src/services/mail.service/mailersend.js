@@ -6,7 +6,7 @@ const { MailerSend, EmailParams, Sender, Recipient, Attachment } = require("mail
  * @param {{
  *  subject: string,
  *  recipients: {email:string, data: object}[],
- *  id:string,
+ *  templateId:string,
  * }} template - html body
  * @returns 
  */
@@ -24,7 +24,7 @@ module.exports = async (template) => {
     .setReplyTo(sentFrom)
     .setPersonalization(template.recipients)
     .setSubject(template.subject)
-    .setTemplateId(template.id);
+    .setTemplateId(template.templateId);
 
   await mailerSend.email.send(emailParams);
 }
