@@ -5,6 +5,7 @@ const User = require('../models/user.model')
 const CustomError = require('../utils/customError')
 const MediaLib = require('../services/mediaUpload.service')
 const sendMail = require('../services/mail.service')
+const buildPDF = require('../services/pdf-builder.service')
 const config = require('../config')
 
 const createIdempotencyKey = async (length = 32) => {
@@ -200,6 +201,42 @@ exports.getOneForClients = async (req, res, next) => {
 			status: 'success',
 			message: 'Document details.',
 			data: document,
+		})
+	} catch (error) {
+		return next(error)
+	}
+}
+
+exports.getPDFForClient = async (req, res, next) => {
+	try {
+		const document = await Document.findById(req.params.id).lean()
+		if (!document) throw new CustomError('Document record not found.', 404)
+
+		document.clients = document.clients.filter(x => x._id.toString() === req.params.clientId);
+
+		const base64String = await buildPDF(document.image, document.fields, document.clients);
+
+		return res.status(200).json({
+			status: 'success',
+			message: 'Document details.',
+			data: base64String,
+		})
+	} catch (error) {
+		return next(error)
+	}
+}
+
+exports.getPDFForOrganization = async (req, res, next) => {
+	try {
+		const document = await Document.findById(req.params.id).lean()
+		if (!document) throw new CustomError('Document record not found.', 404)
+
+		const base64String = await buildPDF(document.image, document.fields, document.clients);
+
+		return res.status(200).json({
+			status: 'success',
+			message: 'Document details.',
+			data: base64String,
 		})
 	} catch (error) {
 		return next(error)

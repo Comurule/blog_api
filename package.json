@@ -43,6 +43,8 @@
     "mailgun.js": "^8.0.6",
     "mongoose": "^6.1.6",
     "morgan": "^1.10.0",
+    "node-fetch": "^2.6.9",
+    "pdf-lib": "^1.17.1",
     "winston": "^3.4.0"
   }
 }

@@ -12,6 +12,8 @@ router
 	.delete(documentController.delete)
 	.put(documentController.update)
 
+router.get('/:id/certificates', documentController.getPDFForOrganization)
+router.get('/:id/clients/:clientId/certificates', documentController.getPDFForClient)
 router.get('/:id/clients/:clientId', documentController.getOneForClients)
 
 module.exports = router

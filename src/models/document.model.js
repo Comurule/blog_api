@@ -26,6 +26,11 @@ const fieldSchema = new mongoose.Schema({
 		required: true,
 		default: "",
 	},
+	fontSize: {
+		type: Number,
+		required: true,
+		default: 20,
+	},
 	width: {
 		type: mongoose.Decimal128,
 		required: true,
