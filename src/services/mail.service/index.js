@@ -10,7 +10,7 @@ const validate = (mailType, data) => {
     }
     if (!typeDataFields[mailType]) throw new Error(`Invalid mailType: got ${mailType}.`)
     const absentFields = typeDataFields[mailType].filter(x => !data[x]);
-    if (absentFields.length > 0) throw new Error(`Some fields are missing for this mail type. Missing "${absentFields.join(', ')}"`)
+    if (absentFields.length > 0) throw new Error(`Some fields are missing for this mail type: ${mailType}. Missing "${absentFields.join(', ')}"`)
 }
 
 const getEmailTemplate = (mailType, data) => {
@@ -18,6 +18,10 @@ const getEmailTemplate = (mailType, data) => {
         [constants.EMAIL.TYPE.OTP_VERIFICATION]: () => ({
             templateId: config.MAILERSEND.TEMPLATE_ID.OTP,
             subject: constants.EMAIL.SUBJECT.OTP_VERIFICATION,
+            sender: {
+                email: config.MAILER_SENDER_EMAIL_NO_REPLY,
+                name: config.MAILER_SENDER_NAME,
+            },
             recipients: [{
                 email: data.user.email,
                 data: {
@@ -29,13 +33,17 @@ const getEmailTemplate = (mailType, data) => {
         [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: () => ({
             templateId: config.MAILERSEND.TEMPLATE_ID.PARTICIPANT,
             subject: constants.EMAIL.SUBJECT.DOCUMENT_RECIPIENT,
+            sender: {
+                email: config.MAILER_SENDER_EMAIL,
+                name: config.MAILER_SENDER_NAME,
+            },
             recipients: data.recipients.map(x => ({
                 email: x.email,
                 data: {
                     recipient_name: x.name,
                     convener_name: data.convener.organization_name,
                     convener_email: data.convener.email,
-                    document_url: `https://docuplier.com/document?doc=${data.document_id}&client=${x._id}`,
+                    document_url: `${config.FRONTEND.ROUTES.HOSTNAME}${config.FRONTEND.ROUTES.RECIPIENT_CERTIFICATE}?doc=${data.document_id}&client=${x._id}`,
                 }
             })) 
         }),
@@ -43,10 +51,15 @@ const getEmailTemplate = (mailType, data) => {
         [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: () => ({
             templateId: config.MAILERSEND.TEMPLATE_ID.CONVENER,
             subject: constants.EMAIL.SUBJECT.DOCUMENT_CONVENER,
+            sender: {
+                email: config.MAILER_SENDER_EMAIL,
+                name: config.MAILER_SENDER_NAME,
+            },
             recipients: [{
                 email: data.convener.email,
                 data: {
-                    document_url: `https://docuplier.com/document?doc=${data?.document_id}`,
+                    convener_name: data.convener.organization_name,
+                    document_organisation_url: `${config.FRONTEND.ROUTES.HOSTNAME}${config.FRONTEND.ROUTES.CONVENER_CERTIFICATE}?doc=${data?.document_id}`,
                 }
             }]
         }),
@@ -59,6 +72,5 @@ module.exports = (mailType, data) => {
     validate(mailType, data);
     const template = getEmailTemplate(mailType, data);
 
-    console.log('Email Template:::', JSON.stringify(template, null, 2));
     return sendMail(template);
 }

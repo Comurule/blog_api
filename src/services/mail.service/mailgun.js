@@ -4,30 +4,31 @@ const config = require('../../config');
 
 /**
  * 
- * @param {string} template - html body
- * @param {{email: string, subject: string}} data - email and subject of the email to be sent
- * @returns 
+ * @param {{
+*  subject: string,
+*  sender: {name:string, email:string},
+*  recipients: {email:string, data: object}[],
+*  templateId: string,
+* }} template - html body
+* @returns 
  */
-module.exports = async (templateData, data) => {
+module.exports = async (template) => {
   const fsPromises = require('fs').promises;
   const path = require('path');
 
   const mailgun = new Mailgun(formData);
   const filepath = path.resolve(__dirname, './templates.mail.service/image.png');
   const client = mailgun.client({ username: 'api', key: config.MAILGUN_API_KEY });
+  const variables = template.recipients.reduce((res, recipient) => (res[recipient.email] = recipient.data), {});
 
   const messageData = {
-    from: `${config.MAILER_SENDER_NAME} <${config.MAILER_SENDER_EMAIL}>`,
-    to: data.email,
-    subject: data.subject,
-    html: templateData.template,
+    from: `${template.sender.name} <${template.sender.email}>`,
+    to: template.recipients.map(x => x.email),
+    subject: template.subject,
+    html: template.html,
     'o:testmode': true,
+    'recipient-variables': JSON.stringify(variables)
   };
-
-  // For batching sending in mailgun. see https://documentation.mailgun.com/en/latest/user_manual.html#batch-sending-1
-  if (templateData.bulkEmailData) {
-    messageData['recipient-variables'] = JSON.stringify(templateData.bulkEmailData)
-  }
 
   const fileData = await fsPromises.readFile(filepath);
   const file = { filename: 'docuplier.png', data: fileData };

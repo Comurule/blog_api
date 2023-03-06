@@ -76,7 +76,7 @@ exports.create = async (req, res, next) => {
 				{
 					document_id: newDocument._id,
 					recipients: newDocument.clients,
-					covener: {
+					convener: {
 						name: userExists.name,
 						email: userExists.email,
 						organization_name: req.body.orgName
@@ -88,7 +88,7 @@ exports.create = async (req, res, next) => {
 				config.constants.EMAIL.TYPE.DOCUMENT_CONVENER,
 				{
 					document_id: newDocument._id,
-					covener: {
+					convener: {
 						name: userExists.name,
 						email: userExists.email,
 						organization_name: req.body.orgName

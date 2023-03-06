@@ -61,7 +61,10 @@ exports.resendOTP = async (req, res, next) => {
 		if (!otpObject) throw new CustomError('Invalid user Id.', 400);
 
 		// send email verification
-		sendMail('user.verification.otp', { otp: otpObject.otp, user: otpObject.owner });
+		sendMail(
+			config.constants.EMAIL.TYPE.OTP_VERIFICATION,
+			{ otp: otpObject.otp, user: otpObject.owner }
+		);
 
 		return res.status(200).json({
 			status: 'success',

@@ -21,6 +21,15 @@ module.exports = {
 
 	MAILER_SENDER_NAME: process.env.MAILER_SENDER_NAME,
 	MAILER_SENDER_EMAIL: process.env.MAILER_SENDER_EMAIL,
+	MAILER_SENDER_EMAIL_NO_REPLY: process.env.MAILER_SENDER_EMAIL_NO_REPLY,
+
+	FRONTEND: {
+		ROUTES: {
+			HOSTNAME: "https://decuplier.netlify.app",
+			RECIPIENT_CERTIFICATE: "/organisation-document",
+			CONVENER_CERTIFICATE: "/document",
+		},
+	},
 	
 	CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
 	CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,

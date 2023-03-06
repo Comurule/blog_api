@@ -5,6 +5,7 @@ const { MailerSend, EmailParams, Sender, Recipient, Attachment } = require("mail
  * 
  * @param {{
  *  subject: string,
+ *  sender: {name:string, email:string},
  *  recipients: {email:string, data: object}[],
  *  templateId:string,
  * }} template - html body
@@ -15,7 +16,7 @@ module.exports = async (template) => {
     apiKey: config.MAILERSEND.API_KEY,
   });
 
-  const sentFrom = new Sender(config.MAILER_SENDER_EMAIL, config.MAILER_SENDER_NAME);
+  const sentFrom = new Sender(template.sender.email, template.sender.name);
   const recipients = template.recipients.map(x => new Recipient(x.email));
 
   const emailParams = new EmailParams()
