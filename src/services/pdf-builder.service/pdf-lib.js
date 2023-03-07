@@ -77,5 +77,5 @@ module.exports = async (doc, fields, clients) => {
     )
   }
 
-  return document.saveAsBase64({ dataUri: true });
+  return document.save();
 }

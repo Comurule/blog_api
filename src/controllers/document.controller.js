@@ -214,13 +214,13 @@ exports.getPDFForClient = async (req, res, next) => {
 
 		document.clients = document.clients.filter(x => x._id.toString() === req.params.clientId);
 
-		const base64String = await buildPDF(document.image, document.fields, document.clients);
+		const encodedPDFString = await buildPDF(document.image, document.fields, document.clients);
+		const buffer = Buffer.from(encodedPDFString)
+		res.setHeader('Content-Length', buffer.length);
+		res.setHeader('Content-Type', 'application/pdf');
+		res.setHeader('Content-Disposition', 'inline');
 
-		return res.status(200).json({
-			status: 'success',
-			message: 'Document details.',
-			data: base64String,
-		})
+		return res.send(buffer);
 	} catch (error) {
 		return next(error)
 	}
@@ -231,13 +231,13 @@ exports.getPDFForOrganization = async (req, res, next) => {
 		const document = await Document.findById(req.params.id).lean()
 		if (!document) throw new CustomError('Document record not found.', 404)
 
-		const base64String = await buildPDF(document.image, document.fields, document.clients);
+		const encodedPDFString = await buildPDF(document.image, document.fields, document.clients);
+		const buffer = Buffer.from(encodedPDFString)
+		res.setHeader('Content-Length', buffer.length);
+		res.setHeader('Content-Type', 'application/pdf');
+		res.setHeader('Content-Disposition', 'inline');
 
-		return res.status(200).json({
-			status: 'success',
-			message: 'Document details.',
-			data: base64String,
-		})
+		return res.send(buffer);
 	} catch (error) {
 		return next(error)
 	}
