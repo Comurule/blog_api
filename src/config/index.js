@@ -26,8 +26,8 @@ module.exports = {
 	FRONTEND: {
 		ROUTES: {
 			HOSTNAME: "https://decuplier.netlify.app",
-			RECIPIENT_CERTIFICATE: "/organisation-document",
-			CONVENER_CERTIFICATE: "/document",
+			RECIPIENT_CERTIFICATE: "/document",
+			CONVENER_CERTIFICATE: "/organisation-document",
 		},
 	},
 	

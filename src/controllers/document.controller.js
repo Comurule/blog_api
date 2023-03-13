@@ -3,7 +3,7 @@ const Document = require('../models/document.model')
 const Product = require('../models/product.model')
 const User = require('../models/user.model')
 const CustomError = require('../utils/customError')
-const MediaLib = require('../services/mediaUpload.service')
+const MediaLib = require('../services/media-upload.service')
 const sendMail = require('../services/mail.service')
 const buildPDF = require('../services/pdf-builder.service')
 const config = require('../config')
@@ -27,6 +27,11 @@ exports.create = async (req, res, next) => {
 		// Ensure there is at least a client passed
 		if (req.body.clients.length === 0) {
 			throw new CustomError('No recipients passed. Kindly, pass recipients data.', 422)
+		}
+
+		// Ensure there is at most 50 clients passed
+		if (req.body.clients.length >= 50) {
+			throw new CustomError('Maximum recipients count exceeded. The maximum per request is 50', 400)
 		}
 
 		// Ensure that the fields.fieldName is a key in clients
@@ -76,6 +81,7 @@ exports.create = async (req, res, next) => {
 				config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT,
 				{
 					document_id: newDocument._id,
+					email_text: newDocument.emailText,
 					recipients: newDocument.clients,
 					convener: {
 						name: userExists.name,
@@ -174,7 +180,6 @@ exports.getIdempotencyKey = async (req, res, next) => {
 		let isDuplicate = await Document.exists({ idempotencyKey });
 
 		while (isDuplicate) {
-			console.log('hit here...')
 			idempotencyKey = await createIdempotencyKey();
 			isDuplicate = await Document.exists({ idempotencyKey });
 		}
@@ -214,8 +219,9 @@ exports.getPDFForClient = async (req, res, next) => {
 
 		document.clients = document.clients.filter(x => x._id.toString() === req.params.clientId);
 
-		const encodedPDFString = await buildPDF(document.image, document.fields, document.clients);
+		const encodedPDFString = await buildPDF(document);
 		const buffer = Buffer.from(encodedPDFString)
+
 		res.setHeader('Content-Length', buffer.length);
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', 'inline');
@@ -231,13 +237,17 @@ exports.getPDFForOrganization = async (req, res, next) => {
 		const document = await Document.findById(req.params.id).lean()
 		if (!document) throw new CustomError('Document record not found.', 404)
 
-		const encodedPDFString = await buildPDF(document.image, document.fields, document.clients);
-		const buffer = Buffer.from(encodedPDFString)
-		res.setHeader('Content-Length', buffer.length);
-		res.setHeader('Content-Type', 'application/pdf');
-		res.setHeader('Content-Disposition', 'inline');
+		if (document.downloadUrl) return res.redirect(document.downloadUrl);
 
-		return res.send(buffer);
+		const encodedPDFString = await buildPDF(document);
+		const uploadedUrl = await MediaLib.uploadPdf(Buffer.from(encodedPDFString));
+
+		await Document.findByIdAndUpdate(
+			req.params.id,
+			{ downloadUrl: uploadedUrl },
+		);
+
+		return res.redirect(uploadedUrl)
 	} catch (error) {
 		return next(error)
 	}

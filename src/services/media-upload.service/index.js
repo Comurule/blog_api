@@ -1,4 +1,5 @@
 const formidable = require("formidable");
+const streamifier = require('streamifier');
 const cloudinary = require('cloudinary').v2;
 const CustomError = require('../../utils/customError');
 const config = require('../../config');
@@ -39,7 +40,6 @@ exports.parseReqBody = (req) => {
                 return reject(error);
             }
         })
-
     });
 };
 
@@ -52,10 +52,34 @@ exports.uploadImage = async (file) => {
     const validationError = validateImage(image);
     if (validationError) throw new CustomError(validationError, 400);
 
-    const result = await cloudinary.uploader.upload(image.filepath)
+    const uploadOptions = {
+        folder: 'document_images',
+        // format: 'pdf',
+        resource_type: "auto",
+        // stream: true,
+        // upload_preset: 'ml_default',
+    };
+    const result = await cloudinary.uploader.upload(image.filepath, uploadOptions)
 
     return result.secure_url;
 };
+
+exports.uploadPdf = async pdfBuffer => new Promise((resolve, reject) => {
+    const uploadOptions = {
+        folder: 'certificates',
+        format: 'pdf',
+        resource_type: "auto",
+        stream: true,
+    };
+    const returnValue = (err, image) => {
+        if (err) return reject(err);
+
+        resolve(image.secure_url);
+    }
+
+    const uploadStream = cloudinary.uploader.upload_stream(uploadOptions, returnValue);
+    streamifier.createReadStream(pdfBuffer).pipe(uploadStream);
+})
 
 const parseToObj = (flatBody) => {
     const keys = Object.keys(flatBody);

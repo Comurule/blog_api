@@ -15,6 +15,16 @@ const imageSchema = new mongoose.Schema({
 		required: true,
 		default: 0
 	},
+	renderedWidth: {
+		type: Number,
+		required: true,
+		default: 959,
+	},
+	renderedHeight: {
+		type: Number,
+		required: true,
+		default: 685,
+	},
 }, { _id: false })
 const fieldSchema = new mongoose.Schema({
 	fieldName: {
@@ -29,7 +39,7 @@ const fieldSchema = new mongoose.Schema({
 	fontSize: {
 		type: Number,
 		required: true,
-		default: 20,
+		default: 50,
 	},
 	width: {
 		type: mongoose.Decimal128,
@@ -92,6 +102,10 @@ const docSchema = new mongoose.Schema(
 		emailText: {
 			type: String,
 			required: true,
+		},
+		downloadUrl: {
+			type: String,
+			required: false,
 		},
 		image: imageSchema,
 		product: {

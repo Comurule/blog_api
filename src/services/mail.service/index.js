@@ -41,6 +41,7 @@ const getEmailTemplate = (mailType, data) => {
                 email: x.email,
                 data: {
                     recipient_name: x.name,
+                    email_description: data.email_text,
                     convener_name: data.convener.organization_name,
                     convener_email: data.convener.email,
                     document_url: `${config.FRONTEND.ROUTES.HOSTNAME}${config.FRONTEND.ROUTES.RECIPIENT_CERTIFICATE}?doc=${data.document_id}&client=${x._id}`,
