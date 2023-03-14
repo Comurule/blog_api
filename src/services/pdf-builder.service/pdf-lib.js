@@ -12,7 +12,7 @@ const getMediaFormat = url => {
   return lastItem.split('.')[1];
 }
 
-const getValueOf = (field) => typeof field == 'object' ? +field.$numberDecimal : +field;
+const getValueOf = (field) => typeof field == 'object' && field.hasOwnProperty('$numberDecimal') ? +field.$numberDecimal : +field;
 
 const getDocumentImage = async (document, url) => {
   const arrayBuffer = await fetch(url).then(res => res.arrayBuffer())
@@ -48,37 +48,37 @@ const centreImageInPDF = (page, image, dimensions) => {
   });
 }
 
-const getFontObject = async (document, font) => {
-  const fontSamples = {
-    "Nunito": '/fonts/Nunito_Sans/NunitoSans-Bold.ttf',
-    "PT Serif": '/fonts/PT_Serif/PTSerif-Bold.ttf',
-    "Open Sans": '/fonts/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
-    "Montserrat": '/fonts/Montserrat/static/Montserrat-Bold.ttf',
-    "Merriweather": '/fonts/Merriweather_Sans/static/MerriweatherSans-Bold.ttf',
-    "Martian Mono": '/fonts/Martian_Mono/static/MartianMono/MartianMono-Bold.ttf',
-    "Libre Caslon Text": '/fonts/Libre_Caslon_Text/LibreCaslonText-Bold.ttf',
-    "Libre Baskerville": '/fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf',
-    "Lato": '/fonts/Lato/Lato-Bold.ttf',
-    "Fira Sans": '/fonts/Fira_Sans/FiraSans-Bold.ttf',
-    "EB Garamond": '/fonts/EB_Garamond/static/EBGaramond-Bold.ttf',
-    "Dosis": '/fonts/Dosis/static/Dosis-Bold.ttf',
-  };
-
-  const fontUrl = fontSamples[font] || '/fonts/Nunito_Sans/NunitoSans-Bold.ttf';
-  const url = __dirname + fontUrl;
-
-  const fontBytes = await fs.readFile(url);
-  document.registerFontkit(fontkit);
-
-  return document.embedFont(fontBytes);
-}
-
 const TextBoxConfigBuilder = (multiplyingFactor) => {
   const getEquivalenceOf = field => (getValueOf(field) + docSizeAdjustment) * multiplyingFactor;
+  const getFontObject = async (document, font) => {
+    const fontSamples = {
+      "Nunito": '/fonts/Nunito_Sans/NunitoSans-Bold.ttf',
+      "PT Serif": '/fonts/PT_Serif/PTSerif-Bold.ttf',
+      "Open Sans": '/fonts/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
+      "Montserrat": '/fonts/Montserrat/static/Montserrat-Bold.ttf',
+      "Merriweather": '/fonts/Merriweather_Sans/static/MerriweatherSans-Bold.ttf',
+      "Martian Mono": '/fonts/Martian_Mono/static/MartianMono/MartianMono-Bold.ttf',
+      "Libre Caslon Text": '/fonts/Libre_Caslon_Text/LibreCaslonText-Bold.ttf',
+      "Libre Baskerville": '/fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf',
+      "Lato": '/fonts/Lato/Lato-Bold.ttf',
+      "Fira Sans": '/fonts/Fira_Sans/FiraSans-Bold.ttf',
+      "EB Garamond": '/fonts/EB_Garamond/static/EBGaramond-Bold.ttf',
+      "Dosis": '/fonts/Dosis/static/Dosis-Bold.ttf',
+    };
+
+    const fontUrl = fontSamples[font] || '/fonts/Nunito_Sans/NunitoSans-Bold.ttf';
+    const url = __dirname + fontUrl;
+
+    const fontBytes = await fs.readFile(url);
+    document.registerFontkit(fontkit);
+
+    return document.embedFont(fontBytes);
+  }
   const getOneBuild = async (fieldObject) => {
     const params = {
       fontSize: getEquivalenceOf(fieldObject.fontSize),
       fieldName: fieldObject.fieldName,
+      fontFamily: fieldObject.fontFamily,
       width: getEquivalenceOf(fieldObject.width),
       height: getEquivalenceOf(fieldObject.height),
       x: getEquivalenceOf(fieldObject.x),
@@ -90,7 +90,7 @@ const TextBoxConfigBuilder = (multiplyingFactor) => {
       fieldName: params.fieldName,
 
       getOptions: async (document, client) => {
-        const customFont = await getFontObject(document, fieldObject.fontFamily);
+        const customFont = await getFontObject(document, params.fontFamily);
         let textWidth = customFont.widthOfTextAtSize(client[params.fieldName], params.fontSize);
         let fontSize = params.fontSize;
 

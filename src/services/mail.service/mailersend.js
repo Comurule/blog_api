@@ -17,15 +17,26 @@ module.exports = async (template) => {
   });
 
   const sentFrom = new Sender(template.sender.email, template.sender.name);
-  const recipients = template.recipients.map(x => new Recipient(x.email));
 
-  const emailParams = new EmailParams()
+  // const recipients = template.recipients.map(x => new Recipient(x.email));
+  // const emailParams = new EmailParams()
+  //   .setFrom(sentFrom)
+  //   .setTo(recipients)
+  //   .setReplyTo(sentFrom)
+  //   .setPersonalization(template.recipients)
+  //   .setSubject(template.subject)
+  //   .setTemplateId(template.templateId);
+
+  // await mailerSend.email.send(emailParams);
+
+
+  const recipients = template.recipients.map(x => new EmailParams()
     .setFrom(sentFrom)
-    .setTo(recipients)
+    .setTo([new Recipient(x.email)])
     .setReplyTo(sentFrom)
-    .setPersonalization(template.recipients)
+    .setPersonalization(x)
     .setSubject(template.subject)
-    .setTemplateId(template.templateId);
-
-  await mailerSend.email.send(emailParams);
+    .setTemplateId(template.templateId)
+  );
+  await mailerSend.email.sendBulk(recipients);
 }

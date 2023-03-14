@@ -1,5 +1,5 @@
 module.exports = {
-    VALID_IMAGE_FORMATS: ['png', 'jpeg', 'jpg'],
+    VALID_IMAGE_FORMATS: ['png', 'jpeg', 'jpg', 'pdf'],
     MAX_UPLOAD_IMAGE_SIZE: 5*1024*1024,
 
     EMAIL: {
