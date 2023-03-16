@@ -64,7 +64,7 @@ exports.resendOTP = async (req, res, next) => {
 		sendMail(
 			config.constants.EMAIL.TYPE.OTP_VERIFICATION,
 			{ otp: otpObject.otp, user: otpObject.owner }
-		);
+		).catch(console.log);
 
 		return res.status(200).json({
 			status: 'success',
