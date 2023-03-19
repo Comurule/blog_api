@@ -141,13 +141,22 @@ exports.update = async (req, res, next) => {
 }
 
 exports.getAll = async (req, res, next) => {
-	const { owner, product } = req.query
+	const { owner, product, page, perPage } = req.query
 	try {
 		let query = {}
-		if (req.query.hasOwnProperty('owner')) query.owner = owner
-		if (req.query.hasOwnProperty('product')) query.product = product
+		let skip = 0;
+		let limit = perPage || 50;
+		if (req.query.hasOwnProperty('owner')) query.owner = owner;
+		if (req.query.hasOwnProperty('product')) query.product = product;
+		if (req.query.hasOwnProperty('page')) {
+			skip = ((page || 1) - 1) * limit;
+		}
 
-		const documentLists = await Document.find(query).lean()
+		const documentLists = await Document.find(query)
+			.limit(limit)
+			.skip(skip)
+			.populate('owner product')
+			.lean()
 
 		return res.status(200).json({
 			status: 'success',
@@ -218,9 +227,10 @@ exports.getPDFForClient = async (req, res, next) => {
 		if (!document) throw new CustomError('Document record not found.', 404)
 
 		document.clients = document.clients.filter(x => x._id.toString() === req.params.clientId);
+		if (!document.clients.length) throw new CustomError('Document recipient record not found.', 404);
 
 		const encodedPDFString = await buildPDF(document);
-		const buffer = Buffer.from(encodedPDFString)
+		const buffer = Buffer.from(encodedPDFString);
 
 		res.setHeader('Content-Length', buffer.length);
 		res.setHeader('Content-Type', 'application/pdf');
