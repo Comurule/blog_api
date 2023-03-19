@@ -3,7 +3,9 @@ const documentController = require('../controllers/document.controller')
 
 const router = Router()
 
-router.route('/').get(documentController.getAll).post(documentController.create)
+router.route('/')
+	// .get(documentController.getAll)
+	.post(documentController.create)
 router.route('/idempotency-key').get(documentController.getIdempotencyKey)
 
 router
