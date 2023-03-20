@@ -247,7 +247,13 @@ exports.getPDFForOrganization = async (req, res, next) => {
 		const document = await Document.findById(req.params.id).lean()
 		if (!document) throw new CustomError('Document record not found.', 404)
 
-		if (document.downloadUrl) return res.redirect(document.downloadUrl);
+		if (document.downloadUrl) {
+			return res.status(200).json({
+				status: 'success',
+				message: 'Document Certificate PDF.',
+				data: document.downloadUrl,
+			})
+		}
 
 		const encodedPDFString = await buildPDF(document);
 		const uploadedUrl = await MediaLib.uploadPdf(Buffer.from(encodedPDFString));
