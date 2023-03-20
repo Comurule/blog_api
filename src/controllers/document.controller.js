@@ -257,7 +257,11 @@ exports.getPDFForOrganization = async (req, res, next) => {
 			{ downloadUrl: uploadedUrl },
 		);
 
-		return res.redirect(uploadedUrl)
+		return res.status(200).json({
+			status: 'success',
+			message: 'Document Certificate PDF.',
+			data: uploadedUrl,
+		})
 	} catch (error) {
 		return next(error)
 	}
