@@ -98,8 +98,9 @@ const validateImage = image => {
     const maxUploadImageSize = config.constants.MAX_UPLOAD_IMAGE_SIZE;
 
     // Check if they are all images
-    const isValidFormat = validImageFormats.includes(image.originalFilename.split('.')[1]);
-    if (!isValidFormat) return `Unsupported image format detected. Images must be in ${validImageFormats.join(', ')}`;
+    const imageExtension = image.originalFilename.split('.')[1].toLowerCase();
+    const isValidFormat = validImageFormats.includes(imageExtension);
+    if (!isValidFormat) return `Unsupported image format: ${imageExtension}, detected. Images must be in ${validImageFormats.join(', ')}`;
 
     // Check if they dont exceed the file size
     const isValidSize = image.size <= maxUploadImageSize;
