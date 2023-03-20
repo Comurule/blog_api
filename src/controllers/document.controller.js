@@ -171,7 +171,7 @@ exports.getAll = async (req, res, next) => {
 
 exports.getOne = async (req, res, next) => {
 	try {
-		const document = await Document.findById(req.params.id).lean()
+		const document = await Document.findById(req.params.id).populate('owner product').lean()
 		if (!document) throw new CustomError('Document record not found.', 404)
 
 		return res.status(200).json({
