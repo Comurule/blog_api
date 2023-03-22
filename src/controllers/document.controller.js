@@ -206,7 +206,7 @@ exports.getIdempotencyKey = async (req, res, next) => {
 
 exports.getOneForClients = async (req, res, next) => {
 	try {
-		const document = await Document.findById(req.params.id).lean()
+		const document = await Document.findById(req.params.id).populate('owner product').lean()
 		if (!document) throw new CustomError('Document record not found.', 404)
 
 		document.client = document.clients.find(x => x._id.toString() === req.params.clientId);
