@@ -157,6 +157,7 @@ exports.getAll = async (req, res, next) => {
 			.limit(limit)
 			.skip(skip)
 			.populate('owner product')
+			.sort({ createdAt: -1 })
 			.lean()
 
 		return res.status(200).json({
