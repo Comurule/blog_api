@@ -72,6 +72,7 @@ const getEmailTemplate = (mailType, data) => {
 module.exports = (mailType, data) => {
     validate(mailType, data);
     const template = getEmailTemplate(mailType, data);
+    const isBulk = mailType == constants.EMAIL.TYPE.DOCUMENT_RECIPIENT;
 
-    return sendMail(template);
+    return sendMail(template, isBulk);
 }

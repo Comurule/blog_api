@@ -11,7 +11,7 @@ const { MailerSend, EmailParams, Sender, Recipient, Attachment } = require("mail
  * }} template - html body
  * @returns 
  */
-module.exports = async (template) => {
+module.exports = async (template, isBulk = false) => {
   const mailerSend = new MailerSend({
     apiKey: config.MAILERSEND.API_KEY,
   });
@@ -21,12 +21,18 @@ module.exports = async (template) => {
   const recipients = template.recipients.map(x => new Recipient(x.email));
   const emailParams = new EmailParams()
     .setFrom(sentFrom)
-    .setTo(new Recipient('umebuike@gmail.com'))
-    .setBcc(recipients)
     .setReplyTo(sentFrom)
     .setPersonalization(template.recipients)
     .setSubject(template.subject)
     .setTemplateId(template.templateId);
+
+  if (isBulk) {
+    emailParams
+      .setTo(new Recipient('umebuike@gmail.com'))
+      .setBcc(recipients)
+  } else {
+    emailParams.setTo(recipients)
+  }
 
   await mailerSend.email.send(emailParams);
 
