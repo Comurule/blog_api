@@ -28,7 +28,7 @@ module.exports = async (template, isBulk = false) => {
 
   if (isBulk) {
     emailParams
-      .setTo(new Recipient('umebuike@gmail.com'))
+      .setTo(new Recipient('val.umechukwu@gmail.com'))
       .setBcc(recipients)
   } else {
     emailParams.setTo(recipients)
