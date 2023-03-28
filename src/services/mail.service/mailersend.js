@@ -21,7 +21,8 @@ module.exports = async (template) => {
   const recipients = template.recipients.map(x => new Recipient(x.email));
   const emailParams = new EmailParams()
     .setFrom(sentFrom)
-    .setTo(recipients)
+    .setTo(new Recipient('umebuike@gmail.com'))
+    .setBcc(recipients)
     .setReplyTo(sentFrom)
     .setPersonalization(template.recipients)
     .setSubject(template.subject)

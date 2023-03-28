@@ -101,7 +101,8 @@ const docSchema = new mongoose.Schema(
 		},
 		emailText: {
 			type: String,
-			required: true,
+			required: false,
+			default: ''
 		},
 		downloadUrl: {
 			type: String,
