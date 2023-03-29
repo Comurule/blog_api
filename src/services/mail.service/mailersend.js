@@ -7,6 +7,7 @@ const { MailerSend, EmailParams, Sender, Recipient, Attachment } = require("mail
  *  subject: string,
  *  sender: {name:string, email:string},
  *  recipients: {email:string, data: object}[],
+ *  tags: {string[]}
  *  templateId:string,
  * }} template - html body
  * @returns 
@@ -26,6 +27,7 @@ module.exports = async (template, isBulk = false) => {
       .setPersonalization([x])
       .setSubject(template.subject)
       .setTemplateId(template.templateId)
+      .setTags(template.tags)
     );
 
     await mailerSend.email.sendBulk(recipients);
@@ -37,6 +39,7 @@ module.exports = async (template, isBulk = false) => {
       .setTo(recipients)
       .setPersonalization(template.recipients)
       .setSubject(template.subject)
+      .setTags(template.tags)
       .setTemplateId(template.templateId);
 
     await mailerSend.email.send(emailParams);

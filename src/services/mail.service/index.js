@@ -17,7 +17,7 @@ const getEmailTemplate = (mailType, data) => {
     const mailTemplatesByType = {
         [constants.EMAIL.TYPE.OTP_VERIFICATION]: () => ({
             templateId: config.MAILERSEND.TEMPLATE_ID.OTP,
-            subject: constants.EMAIL.SUBJECT.OTP_VERIFICATION,
+            subject: data.subject || constants.EMAIL.SUBJECT.OTP_VERIFICATION,
             sender: {
                 email: config.MAILER_SENDER_EMAIL_NO_REPLY,
                 name: config.MAILER_SENDER_NAME,
@@ -32,7 +32,7 @@ const getEmailTemplate = (mailType, data) => {
 
         [constants.EMAIL.TYPE.DOCUMENT_RECIPIENT]: () => ({
             templateId: config.MAILERSEND.TEMPLATE_ID.PARTICIPANT,
-            subject: constants.EMAIL.SUBJECT.DOCUMENT_RECIPIENT,
+            subject: data.subject || constants.EMAIL.SUBJECT.DOCUMENT_RECIPIENT,
             sender: {
                 email: config.MAILER_SENDER_EMAIL,
                 name: config.MAILER_SENDER_NAME,
@@ -51,7 +51,7 @@ const getEmailTemplate = (mailType, data) => {
 
         [constants.EMAIL.TYPE.DOCUMENT_CONVENER]: () => ({
             templateId: config.MAILERSEND.TEMPLATE_ID.CONVENER,
-            subject: constants.EMAIL.SUBJECT.DOCUMENT_CONVENER,
+            subject: data.subject || constants.EMAIL.SUBJECT.DOCUMENT_CONVENER,
             sender: {
                 email: config.MAILER_SENDER_EMAIL,
                 name: config.MAILER_SENDER_NAME,
@@ -72,7 +72,8 @@ const getEmailTemplate = (mailType, data) => {
 module.exports = (mailType, data) => {
     validate(mailType, data);
     const template = getEmailTemplate(mailType, data);
-    const isBulk = mailType == constants.EMAIL.TYPE.DOCUMENT_RECIPIENT;
+    const isBulk = template.recipients.length > 1;
 
+    template.tags = data.tags;
     return sendMail(template, isBulk);
 }

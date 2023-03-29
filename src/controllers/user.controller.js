@@ -23,7 +23,11 @@ const sendOTPVerify = async (user) => {
 	// send email verification
 	return sendMail(
 		config.constants.EMAIL.TYPE.OTP_VERIFICATION,
-		{ otp, user }
+		{
+			otp,
+			user,
+			tags: [config.constants.EMAIL.TYPE.OTP_VERIFICATION]
+		}
 	)
 }
 
@@ -63,7 +67,11 @@ exports.resendOTP = async (req, res, next) => {
 		// send email verification
 		sendMail(
 			config.constants.EMAIL.TYPE.OTP_VERIFICATION,
-			{ otp: otpObject.otp, user: otpObject.owner }
+			{
+				otp: otpObject.otp,
+				user: otpObject.owner,
+				tags: [config.constants.EMAIL.TYPE.OTP_VERIFICATION, 'resend']
+			}
 		).catch(console.log);
 
 		return res.status(200).json({

@@ -65,7 +65,7 @@ exports.create = async (req, res, next) => {
 		})
 		if (!userExists) throw new CustomError('Owner is invalid. Kindly, sign up and verify your email.', 422)
 
-		const productExists = await Product.exists({
+		const productExists = await Product.findOne({
 			_id: req.body.product,
 			status: true,
 		})
@@ -83,11 +83,17 @@ exports.create = async (req, res, next) => {
 					document_id: newDocument._id,
 					email_text: newDocument.emailText,
 					recipients: newDocument.clients,
+					subject: `A ${productExists.name.substr(0, productExists.name.length - 1)} from ${req.body.orgName}`,
 					convener: {
 						name: userExists.name,
 						email: userExists.email,
 						organization_name: req.body.orgName
 					},
+					tags: [
+						config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT,
+						productExists.name,
+						req.body.orgName
+					]
 				}
 			),
 			//Send email to Convener
@@ -100,6 +106,11 @@ exports.create = async (req, res, next) => {
 						email: userExists.email,
 						organization_name: req.body.orgName
 					},
+					tags: [
+						config.constants.EMAIL.TYPE.DOCUMENT_CONVENER,
+						productExists.name,
+						req.body.orgName
+					]
 				}
 			),
 		]).catch(console.log);
