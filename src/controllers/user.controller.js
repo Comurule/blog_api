@@ -51,7 +51,8 @@ exports.signup = async (req, res, next) => {
 
 		return res.status(201).json({
 			status: 'success',
-			message: 'User created successfully.',
+			// message: 'User created successfully.',
+			message: 'OTP sent. Kindly check your email.',
 			data: user._doc,
 		})
 	} catch (error) {
