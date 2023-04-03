@@ -3,7 +3,7 @@ const PdfLib = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit')
 const fetch = require('node-fetch')
 
-const docSizeAdjustment = 10;
+const docSizeAdjustment = 0;
 
 const getMediaFormat = url => {
   const urlArray = url.split('/');
@@ -23,9 +23,14 @@ const getDocumentImage = async (document, url) => {
       image = document.embedPng(arrayBuffer)
       break;
 
-    case 'pdf':
-      image = document.embedPdf(arrayBuffer)
+    case 'pdf': {
+      imageOption = (await document.embedPdf(arrayBuffer, [0]))[0]
+
+      image = await PdfLib.PDFDocument.load(arrayBuffer)
+      image.width = imageOption.width;
+      image.height = imageOption.height;
       break;
+    }
 
     case 'jpg':
     case 'jpeg':
@@ -121,18 +126,29 @@ const TextBoxConfigBuilder = (multiplyingFactor) => {
 const GeneratePDFDocument = async (docOptions) => {
   const document = await PdfLib.PDFDocument.create();
   let image = null;
+  let options = docOptions.image;
+  if (!image) {
+    image = await getDocumentImage(document, options.src);
+    if (!options.width) options.width = image.width;
+    if (!options.height) options.height = image.height;
+  }
 
   return {
     document,
+    getOptions: () => options,
     addNewPage: async () => {
-      if (!image) {
-        image = await getDocumentImage(document, docOptions.image.src);
+      let PDFPage;
+      if (image instanceof PdfLib.PDFImage) {
+        PDFPage = document.addPage([
+          options.width + docSizeAdjustment,
+          options.height + docSizeAdjustment
+        ]);
+
+        centreImageInPDF(PDFPage, image, options);
+      } else {
+        const page = (await document.copyPages(image, [0]))[0]
+        PDFPage = document.addPage(page)
       }
-      const PDFPage = document.addPage([
-        docOptions.image.width + docSizeAdjustment,
-        docOptions.image.height + docSizeAdjustment
-      ]);
-      centreImageInPDF(PDFPage, image, docOptions.image);
 
       return PDFPage;
     },
@@ -163,7 +179,9 @@ module.exports = async (documentConfiguration) => {
   const pdfDoc = await GeneratePDFDocument(documentConfiguration);
   pdfDoc.addMetaData();
 
+  documentConfiguration.image = pdfDoc.getOptions();
   const multiplyingFactor = documentConfiguration.image.width / documentConfiguration.image.renderedWidth;
+
   const textBoxConfigBuilder = TextBoxConfigBuilder(multiplyingFactor);
   const fieldParams = await textBoxConfigBuilder.build(documentConfiguration.fields);
 
