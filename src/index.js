@@ -15,8 +15,8 @@ const databaseUrl = config.DATABASE_URL
 // Application middlewares
 app.set('trust proxy', 1) // trust first proxy
 app.use(morgan('combined'))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.json({ limit: '1mb' }))
+app.use(express.urlencoded({ extended: false, limit: '1mb' }))
 
 app.use(cors())
 app.options('*', cors())
