@@ -26,54 +26,72 @@ const imageSchema = new mongoose.Schema({
 		default: 685,
 	},
 }, { _id: false })
-const fieldSchema = new mongoose.Schema({
-	fieldName: {
-		type: String,
-		required: true,
+const fieldSchema = new mongoose.Schema(
+	{
+		fieldName: {
+			type: String,
+			required: true,
+		},
+		fontFamily: {
+			type: String,
+			required: true,
+			default: '',
+		},
+		fontColour: {
+			type: String,
+			required: true,
+			default: '',
+		},
+		fontSize: {
+			type: Number,
+			required: true,
+			default: 50,
+		},
+		fontStyle: {
+			type: String,
+			required: true,
+			default: '',
+		},
+		fontCapitalization: {
+			type: String,
+			required: true,
+			default: '',
+		},
+		width: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		height: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		top: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		bottom: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		left: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		right: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		x: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
+		y: {
+			type: mongoose.Decimal128,
+			required: true,
+		},
 	},
-	fontFamily: {
-		type: String,
-		required: true,
-		default: "",
-	},
-	fontSize: {
-		type: Number,
-		required: true,
-		default: 50,
-	},
-	width: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	height: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	top: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	bottom: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	left: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	right: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	x: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-	y: {
-		type: mongoose.Decimal128,
-		required: true,
-	},
-}, { _id: false })
+	{ _id: false }
+)
 const clientSchema = new mongoose.Schema({
 	name: {
 		type: String,
