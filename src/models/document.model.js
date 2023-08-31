@@ -120,7 +120,12 @@ const docSchema = new mongoose.Schema(
 		emailText: {
 			type: String,
 			required: false,
-			default: ''
+			default: '',
+		},
+		notificationMode: {
+			type: String,
+			required: true,
+			default: 'none',
 		},
 		downloadUrl: {
 			type: String,

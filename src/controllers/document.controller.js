@@ -22,32 +22,49 @@ const createIdempotencyKey = async (length = 32) => {
 
 exports.create = async (req, res, next) => {
 	try {
-		req.body = await MediaLib.parseReqBody(req);
-
+		req.body = await MediaLib.parseReqBody(req)
+		const canEmailRecipients =
+			req.body.notificationMode == config.constants.NOTIFICATION_MODE.EMAIL
 		// Ensure there is at least a client passed
 		if (req.body.clients.length === 0) {
-			throw new CustomError('No recipients passed. Kindly, pass recipients data.', 422)
+			throw new CustomError(
+				'No recipients passed. Kindly, pass recipients data.',
+				422
+			)
 		}
 
 		// Ensure there is at most 50 clients passed
 		if (req.body.clients.length >= 50) {
-			throw new CustomError('Maximum recipients count exceeded. The maximum per request is 50', 400)
+			throw new CustomError(
+				'Maximum recipients count exceeded. The maximum per request is 50',
+				400
+			)
 		}
 
 		// Ensure that the fields.fieldName is a key in clients
 		if (!Array.isArray(req.body.fields) || req.body.fields.length === 0) {
-			throw new CustomError('No place holders passed. Kindly, pass placeholders and the respective values.', 422)
+			throw new CustomError(
+				'No place holders passed. Kindly, pass placeholders and the respective values.',
+				422
+			)
 		}
-		const fieldNames = req.body.fields.map(x => x.fieldName);
-		fieldNames.push('email');
+		const fieldNames = req.body.fields.map((x) => x.fieldName)
+		if (canEmailRecipients) fieldNames.push('email')
 		if (!fieldNames.includes('name') || !fieldNames.includes('email')) {
-			throw new CustomError('Invalid place holders passed. Kindly, pass placeholders and the respective values.', 422)
+			throw new CustomError(
+				'Invalid place holders passed. Kindly, pass placeholders and the respective values.',
+				422
+			)
 		}
-		const canProceed = fieldNames.every(key => req.body.clients.every(client => !!client[key]));
-		if (!canProceed) throw new CustomError('Ensure all clients have the fields provided.', 422)
+		const canProceed = fieldNames.every((key) =>
+			req.body.clients.every((client) => !!client[key])
+		)
+		if (!canProceed)
+			throw new CustomError('Ensure all clients have the fields provided.', 422)
 
 		// For idempotencyKey
-		if (!req.body.idempotencyKey) throw new CustomError('idempotencyKey is required.', 422)
+		if (!req.body.idempotencyKey)
+			throw new CustomError('idempotencyKey is required.', 422)
 		const isDuplicate = await Document.findOne({
 			idempotencyKey: req.body.idempotencyKey,
 		})
@@ -63,7 +80,11 @@ exports.create = async (req, res, next) => {
 			_id: req.body.owner,
 			verified: true,
 		})
-		if (!userExists) throw new CustomError('Owner is invalid. Kindly, sign up and verify your email.', 422)
+		if (!userExists)
+			throw new CustomError(
+				'Owner is invalid. Kindly, sign up and verify your email.',
+				422
+			)
 
 		const productExists = await Product.findOne({
 			_id: req.body.product,
@@ -75,45 +96,42 @@ exports.create = async (req, res, next) => {
 		req.body.image.src = await MediaLib.uploadImage(req.body.file)
 		const newDocument = await Document.create(req.body)
 
-		Promise.all([
-			// Send email to recipients
-			sendMail(
-				config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT,
-				{
-					document_id: newDocument._id,
-					email_text: newDocument.emailText,
-					recipients: newDocument.clients,
-					subject: `A ${productExists.name.substr(0, productExists.name.length - 1)} from ${req.body.orgName}`,
-					convener: {
-						name: userExists.name,
-						email: userExists.email,
-						organization_name: req.body.orgName
-					},
-					tags: [
-						config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT,
-						productExists.name,
-						req.body.orgName
-					]
-				}
-			),
-			//Send email to Convener
-			sendMail(
+		// Send email to recipients
+		if (canEmailRecipients) {
+			sendMail(config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT, {
+				document_id: newDocument._id,
+				email_text: newDocument.emailText,
+				recipients: newDocument.clients,
+				subject: `A ${productExists.name.substr(
+					0,
+					productExists.name.length - 1
+				)} from ${req.body.orgName}`,
+				convener: {
+					name: userExists.name,
+					email: userExists.email,
+					organization_name: req.body.orgName,
+				},
+				tags: [
+					config.constants.EMAIL.TYPE.DOCUMENT_RECIPIENT,
+					productExists.name,
+					req.body.orgName,
+				],
+			})
+		}
+		//Send email to Convener
+		sendMail(config.constants.EMAIL.TYPE.DOCUMENT_CONVENER, {
+			document_id: newDocument._id,
+			convener: {
+				name: userExists.name,
+				email: userExists.email,
+				organization_name: req.body.orgName,
+			},
+			tags: [
 				config.constants.EMAIL.TYPE.DOCUMENT_CONVENER,
-				{
-					document_id: newDocument._id,
-					convener: {
-						name: userExists.name,
-						email: userExists.email,
-						organization_name: req.body.orgName
-					},
-					tags: [
-						config.constants.EMAIL.TYPE.DOCUMENT_CONVENER,
-						productExists.name,
-						req.body.orgName
-					]
-				}
-			),
-		]).catch(console.log);
+				productExists.name,
+				req.body.orgName,
+			],
+		})
 
 		return res.status(201).json({
 			status: 'success',
