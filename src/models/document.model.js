@@ -38,9 +38,28 @@ const fieldSchema = new mongoose.Schema(
 			default: '',
 		},
 		fontColour: {
-			type: String,
+			type: {
+				red: {
+					type: Number,
+					required: true,
+					min: 0,
+					max: 255,
+				},
+				green: {
+					type: Number,
+					required: true,
+					min: 0,
+					max: 255,
+				},
+				blue: {
+					type: Number,
+					required: true,
+					min: 0,
+					max: 255,
+				},
+			},
 			required: true,
-			default: '',
+			default: { red: 0, green: 0, blue: 0 },
 		},
 		fontSize: {
 			type: Number,
@@ -99,7 +118,7 @@ const clientSchema = new mongoose.Schema({
 	},
 	email: {
 		type: String,
-		required: true,
+		required: false,
 		default: '',
 	},
 	extras: {

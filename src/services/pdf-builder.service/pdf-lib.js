@@ -79,44 +79,59 @@ const TextBoxConfigBuilder = (multiplyingFactor) => {
 
     return document.embedFont(fontBytes);
   }
-  const getOneBuild = async (fieldObject) => {
-    const params = {
-      fontSize: getEquivalenceOf(fieldObject.fontSize),
-      fieldName: fieldObject.fieldName,
-      fontFamily: fieldObject.fontFamily,
-      width: getEquivalenceOf(fieldObject.width),
-      height: getEquivalenceOf(fieldObject.height),
-      x: getEquivalenceOf(fieldObject.x),
-      //  Since pdf-lib starts from the bottom while frontend starts from the top
-      y: getEquivalenceOf(fieldObject.bottom),
-    }
+  const getColourRatio = (num) => Math.floor(((num || 0) * 100) / 255) / 100
+	const parseColour = (colour) => [
+		getColourRatio(+colour.red),
+		getColourRatio(+colour.green),
+		getColourRatio(+colour.blue),
+	]
+	const getOneBuild = async (fieldObject) => {
+		const params = {
+			fontSize: getEquivalenceOf(fieldObject.fontSize),
+			fieldName: fieldObject.fieldName,
+			fontFamily: fieldObject.fontFamily,
+			fontStyle: fieldObject.fontStyle,
+			fontColour: parseColour(fieldObject.fontColour),
+			fontCapitalization: fieldObject.fontCapitalization,
+			width: getEquivalenceOf(fieldObject.width),
+			height: getEquivalenceOf(fieldObject.height),
+			x: getEquivalenceOf(fieldObject.x),
+			//  Since pdf-lib starts from the bottom while frontend starts from the top
+			y: getEquivalenceOf(fieldObject.bottom),
+		}
 
-    return {
-      fieldName: params.fieldName,
+		return {
+			fieldName: params.fieldName,
 
-      getOptions: async (document, client) => {
-        const customFont = await getFontObject(document, params.fontFamily);
-        let textWidth = customFont.widthOfTextAtSize(client[params.fieldName], params.fontSize);
-        let fontSize = params.fontSize;
+			getOptions: async (document, client) => {
+				const customFont = await getFontObject(document, params.fontFamily)
+				let textWidth = customFont.widthOfTextAtSize(
+					client[params.fieldName],
+					params.fontSize
+				)
+				let fontSize = params.fontSize
 
-        while (params.width < textWidth) {
-          fontSize--;
-          textWidth = customFont.widthOfTextAtSize(client[params.fieldName], fontSize);
-        }
+				while (params.width < textWidth) {
+					fontSize--
+					textWidth = customFont.widthOfTextAtSize(
+						client[params.fieldName],
+						fontSize
+					)
+				}
 
-        const textHeight = customFont.heightAtSize(fontSize);
-        return {
-          x: params.x + (params.width / 2) - (textWidth / 2),
-          y: params.y + (params.height / 2) - (textHeight / 2),
-          font: customFont,
-          size: fontSize,
-          color: PdfLib.rgb(0, 0, 0),
-          lineHeight: fontSize,
-          opacity: 1,
-        }
-      },
-    }
-  }
+				const textHeight = customFont.heightAtSize(fontSize)
+				return {
+					x: params.x + params.width / 2 - textWidth / 2,
+					y: params.y + params.height / 2 - textHeight / 2,
+					font: customFont,
+					size: fontSize,
+					color: PdfLib.rgb(...(params.fontColour || [0, 0, 0])),
+					lineHeight: fontSize,
+					opacity: 1,
+				}
+			},
+		}
+	}
 
   return {
     build: fields => Promise.all(fields.map(getOneBuild)),
