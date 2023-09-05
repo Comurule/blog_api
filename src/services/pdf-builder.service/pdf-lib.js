@@ -79,11 +79,11 @@ const TextBoxConfigBuilder = (multiplyingFactor) => {
 
     return document.embedFont(fontBytes);
   }
-  const getColourRatio = (num) => Math.floor(((num || 0) * 100) / 255) / 100
+  const getColourRatio = (num = 0) => Math.floor((+num * 100) / 255) / 100
 	const parseColour = (colour) => [
-		getColourRatio(+colour.red),
-		getColourRatio(+colour.green),
-		getColourRatio(+colour.blue),
+		getColourRatio(colour?.red),
+		getColourRatio(colour?.green),
+		getColourRatio(colour?.blue),
 	]
 	const getOneBuild = async (fieldObject) => {
 		const params = {
