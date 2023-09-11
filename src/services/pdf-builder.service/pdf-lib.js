@@ -4,82 +4,93 @@ const fontkit = require('@pdf-lib/fontkit')
 const fetch = require('node-fetch')
 
 const docSizeAdjustment = 0;
-
-const getMediaFormat = url => {
-  const urlArray = url.split('/');
-  const lastItem = urlArray[urlArray.length - 1]
-
-  return lastItem.split('.')[1];
+const fontStyles = {
+	UPPERCASE: 'upper-case',
+	LOWERCASE: 'lower-case',
+	SENTENCECASE: 'sentence-case',
 }
 
-const getValueOf = (field) => typeof field == 'object' && field.hasOwnProperty('$numberDecimal') ? +field.$numberDecimal : +field;
+const getMediaFormat = (url) => {
+	const urlArray = url.split('/')
+	const lastItem = urlArray[urlArray.length - 1]
+
+	return lastItem.split('.')[1]
+}
+
+const getValueOf = (field) =>
+	typeof field === 'object' && field.hasOwnProperty('$numberDecimal')
+		? +field.$numberDecimal
+		: +field
 
 const getDocumentImage = async (document, url) => {
-  const arrayBuffer = await fetch(url).then(res => res.arrayBuffer())
-  const mediaFormat = getMediaFormat(url);
+	const arrayBuffer = await fetch(url).then((res) => res.arrayBuffer())
+	const mediaFormat = getMediaFormat(url)
 
-  switch (mediaFormat) {
-    case 'png':
-      image = document.embedPng(arrayBuffer)
-      break;
+	switch (mediaFormat) {
+		case 'png':
+			image = document.embedPng(arrayBuffer)
+			break
 
-    case 'pdf': {
-      imageOption = (await document.embedPdf(arrayBuffer, [0]))[0]
+		case 'pdf': {
+			imageOption = (await document.embedPdf(arrayBuffer, [0]))[0]
 
-      image = await PdfLib.PDFDocument.load(arrayBuffer)
-      image.width = imageOption.width;
-      image.height = imageOption.height;
-      break;
-    }
+			image = await PdfLib.PDFDocument.load(arrayBuffer)
+			image.width = imageOption.width
+			image.height = imageOption.height
+			break
+		}
 
-    case 'jpg':
-    case 'jpeg':
-      image = document.embedJpg(arrayBuffer)
-      break;
+		case 'jpg':
+		case 'jpeg':
+			image = document.embedJpg(arrayBuffer)
+			break
 
-    default:
-      throw new Error(`file type: ${mediaFormat} not supported`)
-  }
+		default:
+			throw new Error(`file type: ${mediaFormat} not supported`)
+	}
 
-  return image;
+	return image
 }
 
 const centreImageInPDF = (page, image, dimensions) => {
-  page.drawImage(image, {
-    x: (page.getWidth() / 2) - (dimensions.width / 2),
-    y: (page.getHeight() / 2) - (dimensions.height / 2),
-    width: dimensions.width,
-    height: dimensions.height,
-  });
+	page.drawImage(image, {
+		x: page.getWidth() / 2 - dimensions.width / 2,
+		y: page.getHeight() / 2 - dimensions.height / 2,
+		width: dimensions.width,
+		height: dimensions.height,
+	})
 }
 
 const TextBoxConfigBuilder = (multiplyingFactor) => {
-  const getEquivalenceOf = field => (getValueOf(field) + docSizeAdjustment) * multiplyingFactor;
-  const getFontObject = async (document, font) => {
-    const fontSamples = {
-      "Nunito": '/fonts/Nunito_Sans/NunitoSans-Bold.ttf',
-      "PT Serif": '/fonts/PT_Serif/PTSerif-Bold.ttf',
-      "Open Sans": '/fonts/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
-      "Montserrat": '/fonts/Montserrat/static/Montserrat-Bold.ttf',
-      "Merriweather": '/fonts/Merriweather_Sans/static/MerriweatherSans-Bold.ttf',
-      "Martian Mono": '/fonts/Martian_Mono/static/MartianMono/MartianMono-Bold.ttf',
-      "Libre Caslon Text": '/fonts/Libre_Caslon_Text/LibreCaslonText-Bold.ttf',
-      "Libre Baskerville": '/fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf',
-      "Lato": '/fonts/Lato/Lato-Bold.ttf',
-      "Fira Sans": '/fonts/Fira_Sans/FiraSans-Bold.ttf',
-      "EB Garamond": '/fonts/EB_Garamond/static/EBGaramond-Bold.ttf',
-      "Dosis": '/fonts/Dosis/static/Dosis-Bold.ttf',
-    };
+	const getEquivalenceOf = (field) =>
+		(getValueOf(field) + docSizeAdjustment) * multiplyingFactor
+	const getFontObject = async (document, font) => {
+		const fontSamples = {
+			Nunito: '/fonts/Nunito_Sans/NunitoSans-Bold.ttf',
+			'PT Serif': '/fonts/PT_Serif/PTSerif-Bold.ttf',
+			'Open Sans': '/fonts/Open_Sans/static/OpenSans/OpenSans-Bold.ttf',
+			Montserrat: '/fonts/Montserrat/static/Montserrat-Bold.ttf',
+			Merriweather: '/fonts/Merriweather_Sans/static/MerriweatherSans-Bold.ttf',
+			'Martian Mono':
+				'/fonts/Martian_Mono/static/MartianMono/MartianMono-Bold.ttf',
+			'Libre Caslon Text': '/fonts/Libre_Caslon_Text/LibreCaslonText-Bold.ttf',
+			'Libre Baskerville': '/fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf',
+			Lato: '/fonts/Lato/Lato-Bold.ttf',
+			'Fira Sans': '/fonts/Fira_Sans/FiraSans-Bold.ttf',
+			'EB Garamond': '/fonts/EB_Garamond/static/EBGaramond-Bold.ttf',
+			Dosis: '/fonts/Dosis/static/Dosis-Bold.ttf',
+		}
 
-    const fontUrl = fontSamples[font] || '/fonts/Nunito_Sans/NunitoSans-Bold.ttf';
-    const url = __dirname + fontUrl;
+		const fontUrl =
+			fontSamples[font] || '/fonts/Nunito_Sans/NunitoSans-Bold.ttf'
+		const url = __dirname + fontUrl
 
-    const fontBytes = await fs.readFile(url);
-    document.registerFontkit(fontkit);
+		const fontBytes = await fs.readFile(url)
+		document.registerFontkit(fontkit)
 
-    return document.embedFont(fontBytes);
-  }
-  const getColourRatio = (num = 0) => Math.floor((+num * 100) / 255) / 100
+		return document.embedFont(fontBytes)
+	}
+	const getColourRatio = (num = 0) => Math.floor((+num * 100) / 255) / 100
 	const parseColour = (colour) => [
 		getColourRatio(colour?.red),
 		getColourRatio(colour?.green),
@@ -109,7 +120,7 @@ const TextBoxConfigBuilder = (multiplyingFactor) => {
 					client[params.fieldName],
 					params.fontSize
 				)
-				let fontSize = params.fontSize
+				let { fontSize } = params
 
 				while (params.width < textWidth) {
 					fontSize--
@@ -130,89 +141,119 @@ const TextBoxConfigBuilder = (multiplyingFactor) => {
 					opacity: 1,
 				}
 			},
+			getText: (string = '') => {
+				let result = ''
+				switch (params.fontCapitalization) {
+					case fontStyles.UPPERCASE:
+						result = string.toUpperCase()
+						break
+
+					case fontStyles.LOWERCASE:
+						result = string.toLowerCase()
+						break
+
+					case fontStyles.SENTENCECASE:
+						result = string
+							.split(' ')
+							.map((w) => w.trim())
+							.map((w) => `${w[0].toUpperCase()}${w.slice(1).toLowerCase()}`)
+							.join(' ')
+						break
+
+					default:
+						result = string
+						break
+				}
+
+				return result
+			},
 		}
 	}
 
-  return {
-    build: fields => Promise.all(fields.map(getOneBuild)),
-  }
+	return {
+		build: (fields) => Promise.all(fields.map(getOneBuild)),
+	}
 }
 
 const GeneratePDFDocument = async (docOptions) => {
-  const document = await PdfLib.PDFDocument.create();
-  let image = null;
-  let options = docOptions.image;
-  if (!image) {
-    image = await getDocumentImage(document, options.src);
-    if (!options.width) options.width = image.width;
-    if (!options.height) options.height = image.height;
-  }
+	const document = await PdfLib.PDFDocument.create()
+	let image = null
+	const options = docOptions.image
+	if (!image) {
+		image = await getDocumentImage(document, options.src)
+		if (!options.width) options.width = image.width
+		if (!options.height) options.height = image.height
+	}
 
-  return {
-    document,
-    getOptions: () => options,
-    addNewPage: async () => {
-      let PDFPage;
-      if (image instanceof PdfLib.PDFImage) {
-        PDFPage = document.addPage([
-          options.width + docSizeAdjustment,
-          options.height + docSizeAdjustment
-        ]);
+	return {
+		document,
+		getOptions: () => options,
+		addNewPage: async () => {
+			let PDFPage
+			if (image instanceof PdfLib.PDFImage) {
+				PDFPage = document.addPage([
+					options.width + docSizeAdjustment,
+					options.height + docSizeAdjustment,
+				])
 
-        centreImageInPDF(PDFPage, image, options);
-      } else {
-        const page = (await document.copyPages(image, [0]))[0]
-        PDFPage = document.addPage(page)
-      }
+				centreImageInPDF(PDFPage, image, options)
+			} else {
+				const page = (await document.copyPages(image, [0]))[0]
+				PDFPage = document.addPage(page)
+			}
 
-      return PDFPage;
-    },
+			return PDFPage
+		},
 
-    addMetaData: () => {
-      // document.setTitle('Certificate')
-      document.setAuthor(docOptions.orgName)
-      document.setSubject('Certificate')
-      // document.setKeywords(['eggs', 'wall', 'fall', 'king', 'horses', 'men'])
-      document.setProducer('Docuplier')
-      document.setCreator('Docuplier (https://docuplier.com)')
-      document.setCreationDate(new Date(docOptions.createdAt))
-      document.setModificationDate(new Date())
-    },
+		addMetaData: () => {
+			// document.setTitle('Certificate')
+			document.setAuthor(docOptions.orgName)
+			document.setSubject('Certificate')
+			// document.setKeywords(['eggs', 'wall', 'fall', 'king', 'horses', 'men'])
+			document.setProducer('Docuplier')
+			document.setCreator('Docuplier (https://docuplier.com)')
+			document.setCreationDate(new Date(docOptions.createdAt))
+			document.setModificationDate(new Date())
+		},
 
-    build: () => document.save(),
-  }
-
+		build: () => document.save(),
+	}
 }
 
 /**
- * 
+ *
  * @param {object} documentConfiguration - document record
- * 
+ *
  * @returns {Promise<Uint8Array>} pdf in Uint8Array
  */
 module.exports = async (documentConfiguration) => {
-  const pdfDoc = await GeneratePDFDocument(documentConfiguration);
-  pdfDoc.addMetaData();
+	const pdfDoc = await GeneratePDFDocument(documentConfiguration)
+	pdfDoc.addMetaData()
 
-  documentConfiguration.image = pdfDoc.getOptions();
-  const multiplyingFactor = documentConfiguration.image.width / documentConfiguration.image.renderedWidth;
+	documentConfiguration.image = pdfDoc.getOptions()
+	const multiplyingFactor =
+		documentConfiguration.image.width /
+		documentConfiguration.image.renderedWidth
 
-  const textBoxConfigBuilder = TextBoxConfigBuilder(multiplyingFactor);
-  const fieldParams = await textBoxConfigBuilder.build(documentConfiguration.fields);
+	const textBoxConfigBuilder = TextBoxConfigBuilder(multiplyingFactor)
+	const fieldParams = await textBoxConfigBuilder.build(
+		documentConfiguration.fields
+	)
 
-  for (let i = 0; i < documentConfiguration.clients.length; i++) {
-    const client = documentConfiguration.clients[i];
-    const page = await pdfDoc.addNewPage();
+	for (let i = 0; i < documentConfiguration.clients.length; i++) {
+		const client = documentConfiguration.clients[i]
+		const page = await pdfDoc.addNewPage()
 
-    for (let j = 0; j < fieldParams.length; j++) {
-      const textBoxConfig = fieldParams[j];
+		for (let j = 0; j < fieldParams.length; j++) {
+			const textBoxConfig = fieldParams[j]
+			const text = textBoxConfig.getText(client[textBoxConfig.fieldName])
 
-      page.drawText(
-        client[textBoxConfig.fieldName],
-        await textBoxConfig.getOptions(pdfDoc.document, client)
-      )
-    }
-  }
+			page.drawText(
+				text,
+				await textBoxConfig.getOptions(pdfDoc.document, client)
+			)
+		}
+	}
 
-  return pdfDoc.build();
+	return pdfDoc.build()
 }

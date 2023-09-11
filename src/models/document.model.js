@@ -26,6 +26,29 @@ const imageSchema = new mongoose.Schema({
 		default: 685,
 	},
 }, { _id: false })
+const colourSchema = new mongoose.Schema(
+	{
+		red: {
+			type: Number,
+			required: true,
+			min: 0,
+			max: 255,
+		},
+		green: {
+			type: Number,
+			required: true,
+			min: 0,
+			max: 255,
+		},
+		blue: {
+			type: Number,
+			required: true,
+			min: 0,
+			max: 255,
+		},
+	},
+	{ _id: false }
+)
 const fieldSchema = new mongoose.Schema(
 	{
 		fieldName: {
@@ -38,26 +61,7 @@ const fieldSchema = new mongoose.Schema(
 			default: '',
 		},
 		fontColour: {
-			type: {
-				red: {
-					type: Number,
-					required: true,
-					min: 0,
-					max: 255,
-				},
-				green: {
-					type: Number,
-					required: true,
-					min: 0,
-					max: 255,
-				},
-				blue: {
-					type: Number,
-					required: true,
-					min: 0,
-					max: 255,
-				},
-			},
+			type: colourSchema,
 			required: true,
 			default: { red: 0, green: 0, blue: 0 },
 		},
