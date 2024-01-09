@@ -1,4 +1,4 @@
-# fixbot
+# Blog API
 
 ### Description ###
 
@@ -16,12 +16,12 @@ To run this application, you'll need
 
 * Clone the repository using this command(in your Command Line)
 ```
-git clone https://github.com/Comurule/fixbot.git
+git clone https://github.com/Comurule/blog_api.git
 ```
 
 * Go into the repository
 ```
-cd fixbot
+cd blog_api
 ```
 
 * Create .env file for environmental variables in your root directory like the __.env.sample__ file and provide the mongo database uri 
@@ -36,10 +36,15 @@ npm install
 npm start
 ```
 
-* Check the port on the specified port on the env or 8080
+* Run test with this command(in your Command Line)
+```
+npm test
+```
+
+* Check the port on the specified port on the env or 8000
 
 ### API End Points ###
-The Endpoints documentation can be gotten in [this Postman documentation](https://documenter.getpostman.com/view/11194465/UVXgNJHx).
+The Endpoints documentation can be gotten in [this Postman documentation](https://documenter.getpostman.com/view/11194465/2s9YsKerLP).
 
 ### Recommended Improvements
 - More input valdation and Error handling
